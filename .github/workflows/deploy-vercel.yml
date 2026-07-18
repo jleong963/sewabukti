@@ -80,6 +80,7 @@ jobs:
         with:
           name: web-build
           path: web
+          if-no-artifact-found: error
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
@@ -99,6 +100,16 @@ jobs:
             ]
           }
           JSON
+
+      # Fail loudly here rather than silently shipping an empty/broken
+      # production deployment (this is what actually happened previously).
+      - name: Verify assembled output
+        run: |
+          echo "Files in .vercel/output/static: $(find .vercel/output/static -type f | wc -l)"
+          test -f .vercel/output/static/index.html || {
+            echo "::error::index.html missing from assembled Vercel output — web-build artifact was likely empty or incomplete. Aborting deploy."
+            exit 1
+          }
 
       - name: Deploy prebuilt output to production
         run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" > deployment-url.txt
