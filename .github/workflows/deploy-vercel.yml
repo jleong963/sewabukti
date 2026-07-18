@@ -76,11 +76,13 @@ jobs:
       VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
     steps:
       - name: Download web build artifact
+        # download-artifact@v4 already fails the step if the named artifact is
+        # missing; the "Verify assembled output" step below is the real guard
+        # against an empty/partial artifact slipping through to production.
         uses: actions/download-artifact@v4
         with:
           name: web-build
           path: web
-          if-no-artifact-found: error
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
