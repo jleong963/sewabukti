@@ -1,0 +1,12 @@
+{
+  "imports": {
+    "jose": "npm:jose@^5.9.6",
+    "libsql": "npm:@libsql/client@^0.14.0/web",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@^2.45.0"
+  },
+  "lint": {
+    "rules": {
+      "tags": ["recommended"]
+    }
+  }
+}

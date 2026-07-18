@@ -1,0 +1,112 @@
+# Production deployment to Vercel on push to the protected `master` branch.
+# Reruns all checks, builds once, then deploys the EXACT built artifact
+# (§7.3 required pipeline behaviour #2, #4, #5, #6, #7; NFR-SEC-19).
+name: Deploy (Vercel)
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer run supersedes an in-flight older one, so an older run cannot
+# overwrite a newer successful deployment (§7.3 behaviour #6).
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.44.4"
+
+jobs:
+  build:
+    name: Validate and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Static analysis
+        run: flutter analyze
+
+      - name: Unit and widget tests
+        run: flutter test
+
+      - name: Build Flutter Web (production)
+        run: >-
+          flutter build web --release
+          --dart-define=APP_ENV=production
+          --dart-define=SUPABASE_URL=${{ vars.SUPABASE_URL }}
+          --dart-define=SUPABASE_ANON_KEY=${{ vars.SUPABASE_ANON_KEY }}
+          --dart-define=GOOGLE_OAUTH_CLIENT_ID=${{ vars.GOOGLE_OAUTH_CLIENT_ID }}
+          --dart-define=KEEPALIVE_INTERVAL_SECONDS=${{ vars.KEEPALIVE_INTERVAL_SECONDS || '0' }}
+          --dart-define=INACTIVE_TIMEOUT=${{ vars.INACTIVE_TIMEOUT || '0' }}
+
+      - name: Upload web build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/web
+          retention-days: 3
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy to Vercel production
+    needs: build
+    runs-on: ubuntu-latest
+    # Bind Vercel deploy secrets to a protected GitHub Environment (NFR-SEC-18).
+    environment: production
+    env:
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+    steps:
+      - name: Download web build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: web
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      # Assemble a Vercel "prebuilt" output from the exact artifact so Vercel
+      # serves what CI built (no rebuild on Vercel), with SPA fallback routing.
+      - name: Assemble prebuilt output
+        run: |
+          mkdir -p .vercel/output/static
+          cp -r web/* .vercel/output/static/
+          cat > .vercel/output/config.json <<'JSON'
+          {
+            "version": 3,
+            "routes": [
+              { "handle": "filesystem" },
+              { "src": "/.*", "dest": "/index.html" }
+            ]
+          }
+          JSON
+
+      - name: Deploy prebuilt output to production
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN" > deployment-url.txt
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Publish deployment URL
+        run: |
+          echo "### Vercel production deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "$(cat deployment-url.txt)" >> "$GITHUB_STEP_SUMMARY"

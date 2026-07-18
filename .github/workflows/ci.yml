@@ -1,0 +1,60 @@
+# Pull-request validation: format, analyse, test, and a production web build.
+# Does NOT deploy (§7.3 required pipeline behaviour #1, #3).
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+# Least privilege; fork PRs receive no production secrets (NFR-SEC-20).
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.44.4"
+
+jobs:
+  validate:
+    name: Format, analyse, test, build
+    runs-on: ubuntu-latest
+    steps:
+      # Third-party actions are pinned to a reviewed tag; pin to a full commit
+      # SHA for stronger supply-chain guarantees (NFR-SEC-21).
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Static analysis
+        run: flutter analyze
+
+      - name: Unit and widget tests
+        run: flutter test
+
+      # Public build values only (§7.3). These are GitHub Actions *Variables*,
+      # not secrets, and are safe to compile into the client.
+      - name: Build Flutter Web (production)
+        run: >-
+          flutter build web --release
+          --dart-define=APP_ENV=production
+          --dart-define=SUPABASE_URL=${{ vars.SUPABASE_URL }}
+          --dart-define=SUPABASE_ANON_KEY=${{ vars.SUPABASE_ANON_KEY }}
+          --dart-define=GOOGLE_OAUTH_CLIENT_ID=${{ vars.GOOGLE_OAUTH_CLIENT_ID }}
+          --dart-define=KEEPALIVE_INTERVAL_SECONDS=${{ vars.KEEPALIVE_INTERVAL_SECONDS || '0' }}
+          --dart-define=INACTIVE_TIMEOUT=${{ vars.INACTIVE_TIMEOUT || '0' }}

@@ -1,0 +1,44 @@
+# Retention purge (§23.3, NFR-SEC-15). Invokes the `purge-deleted` Edge Function
+# once a day to permanently remove accounts and cases that were soft-deleted
+# more than the retention window ago (RETENTION_PURGE_DAYS, default 30), along
+# with their storage objects. Guarded by the PURGE_SECRET shared secret.
+name: Purge soft-deleted data
+
+on:
+  schedule:
+    - cron: "30 2 * * *" # daily at 02:30 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: purge-deleted
+  cancel-in-progress: false
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke purge-deleted function
+        env:
+          PURGE_SECRET: ${{ secrets.PURGE_SECRET }}
+        run: |
+          base="${{ vars.SUPABASE_URL }}"
+          if [ -z "$base" ]; then
+            echo "::warning::SUPABASE_URL variable is not set; skipping purge"
+            exit 0
+          fi
+          if [ -z "$PURGE_SECRET" ]; then
+            echo "::warning::PURGE_SECRET is not set; skipping purge"
+            exit 0
+          fi
+          body=$(curl -s -o /tmp/purge_body -w "%{http_code}" -X POST \
+            -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
+            -H "x-purge-secret: $PURGE_SECRET" \
+            "$base/functions/v1/purge-deleted")
+          echo "purge-deleted responded: HTTP $body"
+          cat /tmp/purge_body || true
+          if [ "$body" != "200" ]; then
+            echo "::warning::purge-deleted returned HTTP $body"
+          fi

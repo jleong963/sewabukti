@@ -1,0 +1,40 @@
+# Keeps the free-tier Supabase project awake during zero-user periods by
+# pinging the unauthenticated `keep-alive` Edge Function on a schedule.
+#
+# Cadence is deliberately coarse: Supabase pauses a free project only after
+# ~7 days of inactivity, so a few pings per day is ample and stays well within
+# free GitHub Actions minutes. (The in-app client heartbeat, configured by the
+# KEEPALIVE_INTERVAL_SECONDS variable, covers periods when the app is open.)
+name: Keep Supabase awake
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours (UTC)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: keep-alive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping keep-alive function
+        run: |
+          echo "Client heartbeat interval: ${{ vars.KEEPALIVE_INTERVAL_SECONDS || '0' }}s"
+          base="${{ vars.SUPABASE_URL }}"
+          if [ -z "$base" ]; then
+            echo "::warning::SUPABASE_URL variable is not set; skipping ping"
+            exit 0
+          fi
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
+            "$base/functions/v1/keep-alive")
+          echo "keep-alive responded: HTTP $code"
+          if [ "$code" != "200" ]; then
+            echo "::warning::keep-alive returned HTTP $code"
+          fi

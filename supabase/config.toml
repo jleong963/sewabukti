@@ -1,0 +1,73 @@
+# Supabase project configuration.
+# The project ref is set via CI/CLI (`supabase link --project-ref ...`); this
+# file pins function behaviour.
+
+project_id = "sewabukti"
+
+# SewaBukti authenticates with Google ID tokens, NOT Supabase Auth
+# (FR-AUTH-01, NFR-SEC-23). The Supabase gateway must therefore NOT try to
+# verify a Supabase JWT — each protected function performs mandatory custom
+# Google token verification internally and fails closed (§14, NFR-SEC-24/25).
+
+[functions.create-or-update-user]
+verify_jwt = false
+
+[functions.create-case]
+verify_jwt = false
+
+[functions.get-case]
+verify_jwt = false
+
+[functions.update-case]
+verify_jwt = false
+
+[functions.delete-case]
+verify_jwt = false
+
+[functions.create-upload]
+verify_jwt = false
+
+[functions.complete-upload]
+verify_jwt = false
+
+[functions.delete-evidence]
+verify_jwt = false
+
+[functions.list-evidence]
+verify_jwt = false
+
+[functions.create-download]
+verify_jwt = false
+
+[functions.list-timeline]
+verify_jwt = false
+
+[functions.create-timeline-event]
+verify_jwt = false
+
+[functions.update-timeline-event]
+verify_jwt = false
+
+[functions.delete-timeline-event]
+verify_jwt = false
+
+[functions.reorder-timeline]
+verify_jwt = false
+
+[functions.send-demand-letter]
+verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false
+
+# keep-alive is intentionally unauthenticated (no Google token): it is pinged by
+# a scheduler and the client heartbeat to prevent free-tier inactivity pause.
+# It performs no sensitive work — only a trivial liveness touch.
+[functions.keep-alive]
+verify_jwt = false
+
+# purge-deleted is a scheduled system job (retention purge, §23.3). It uses no
+# Google/Supabase JWT — it is guarded by its own PURGE_SECRET shared secret and
+# invoked by a scheduled workflow, so the gateway must not verify a JWT.
+[functions.purge-deleted]
+verify_jwt = false

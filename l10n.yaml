@@ -1,0 +1,9 @@
+# Flutter localisation generation config.
+# ARB files live in lib/src/l10n; generated Dart is emitted alongside them.
+arb-dir: lib/src/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false
+# English is the template and the guaranteed fallback (FR-PREF-01, FR-PREF-12).
+untranslated-messages-file: build/untranslated_messages.txt
