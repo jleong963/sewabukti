@@ -47,14 +47,16 @@ jobs:
       - name: Unit and widget tests
         run: flutter test
 
-      # Public build values only (§7.3). These are GitHub Actions *Variables*,
-      # not secrets, and are safe to compile into the client.
+      # Public build values (§7.3), stored as GitHub Actions *Secrets* in this
+      # repo and read from `secrets.*`. They are safe to compile into the client;
+      # sourcing from secrets also means fork PRs build with them empty
+      # (NFR-SEC-20) — the build still succeeds, backend calls are just inert.
       - name: Build Flutter Web (production)
         run: >-
           flutter build web --release
           --dart-define=APP_ENV=production
-          --dart-define=SUPABASE_URL=${{ vars.SUPABASE_URL }}
-          --dart-define=SUPABASE_ANON_KEY=${{ vars.SUPABASE_ANON_KEY }}
-          --dart-define=GOOGLE_OAUTH_CLIENT_ID=${{ vars.GOOGLE_OAUTH_CLIENT_ID }}
+          --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          --dart-define=GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
           --dart-define=KEEPALIVE_INTERVAL_SECONDS=${{ vars.KEEPALIVE_INTERVAL_SECONDS || '0' }}
           --dart-define=INACTIVE_TIMEOUT=${{ vars.INACTIVE_TIMEOUT || '0' }}

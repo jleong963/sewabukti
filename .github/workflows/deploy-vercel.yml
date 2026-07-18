@@ -47,13 +47,17 @@ jobs:
       - name: Unit and widget tests
         run: flutter test
 
+      # SUPABASE_URL/ANON_KEY and GOOGLE_OAUTH_CLIENT_ID are public, browser-safe
+      # build values (§7.3) but are stored as GitHub Actions *Secrets* in this
+      # repo, so they are read from `secrets.*` (GitHub masks them in logs, which
+      # is harmless — they are compiled into the public client either way).
       - name: Build Flutter Web (production)
         run: >-
           flutter build web --release
           --dart-define=APP_ENV=production
-          --dart-define=SUPABASE_URL=${{ vars.SUPABASE_URL }}
-          --dart-define=SUPABASE_ANON_KEY=${{ vars.SUPABASE_ANON_KEY }}
-          --dart-define=GOOGLE_OAUTH_CLIENT_ID=${{ vars.GOOGLE_OAUTH_CLIENT_ID }}
+          --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+          --dart-define=GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
           --dart-define=KEEPALIVE_INTERVAL_SECONDS=${{ vars.KEEPALIVE_INTERVAL_SECONDS || '0' }}
           --dart-define=INACTIVE_TIMEOUT=${{ vars.INACTIVE_TIMEOUT || '0' }}
 
