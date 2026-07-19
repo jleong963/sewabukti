@@ -24,9 +24,9 @@ jobs:
         env:
           PURGE_SECRET: ${{ secrets.PURGE_SECRET }}
         run: |
-          base="${{ vars.SUPABASE_URL }}"
+          base="${{ secrets.SUPABASE_URL }}"
           if [ -z "$base" ]; then
-            echo "::warning::SUPABASE_URL variable is not set; skipping purge"
+            echo "::warning::SUPABASE_URL secret is not set; skipping purge"
             exit 0
           fi
           if [ -z "$PURGE_SECRET" ]; then
@@ -34,7 +34,7 @@ jobs:
             exit 0
           fi
           body=$(curl -s -o /tmp/purge_body -w "%{http_code}" -X POST \
-            -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "x-purge-secret: $PURGE_SECRET" \
             "$base/functions/v1/purge-deleted")
           echo "purge-deleted responded: HTTP $body"

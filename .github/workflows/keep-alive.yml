@@ -26,13 +26,13 @@ jobs:
       - name: Ping keep-alive function
         run: |
           echo "Client heartbeat interval: ${{ vars.KEEPALIVE_INTERVAL_SECONDS || '0' }}s"
-          base="${{ vars.SUPABASE_URL }}"
+          base="${{ secrets.SUPABASE_URL }}"
           if [ -z "$base" ]; then
-            echo "::warning::SUPABASE_URL variable is not set; skipping ping"
+            echo "::warning::SUPABASE_URL secret is not set; skipping ping"
             exit 0
           fi
           code=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             "$base/functions/v1/keep-alive")
           echo "keep-alive responded: HTTP $code"
           if [ "$code" != "200" ]; then
