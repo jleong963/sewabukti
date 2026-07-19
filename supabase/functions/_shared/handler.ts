@@ -48,12 +48,21 @@ export function withAuth(
     } catch (error) {
       if (error instanceof AuthError) {
         const status = error.code === "server_misconfigured" ? 500 : 401;
+        // Server-side only: a 5xx here is an ops/config problem worth logging.
+        if (status >= 500) {
+          console.error("[withAuth] auth misconfig:", error.code, error.message);
+        }
         return errorResponse(status, error.code, error.message);
       }
       if (error instanceof ApiError) {
+        if (error.status >= 500) {
+          console.error("[withAuth] api error:", error.code, error.message);
+        }
         return errorResponse(error.status, error.code, error.message);
       }
-      // Never surface internal error details or stack traces (§14.10).
+      // Log the real cause to the function logs so a 500 is diagnosable; the
+      // client response never carries internal details or stack traces (§14.10).
+      console.error("[withAuth] unexpected error:", error);
       return errorResponse(500, "internal_error", "Unexpected error");
     }
   };
