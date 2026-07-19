@@ -9,6 +9,7 @@ import 'package:sewabukti/src/features/chronology/timeline_controller.dart';
 import 'package:sewabukti/src/features/chronology/timeline_event.dart';
 import 'package:sewabukti/src/features/evidence/evidence_controller.dart';
 import 'package:sewabukti/src/features/evidence/evidence_file.dart';
+import 'package:sewabukti/src/features/shared/widgets/language_selector.dart';
 import 'package:sewabukti/src/l10n/app_localizations.dart';
 
 /// Chronology builder (§10.5, FR-CHR-*). Add, edit, reorder, and delete factual
@@ -52,6 +53,7 @@ class _CaseChronologyPageState extends ConsumerState<CaseChronologyPage> {
         ),
         title: Text(l10n.chronologyTitle),
         actions: <Widget>[
+          const LanguageSelector(compact: true),
           if (hasCase)
             IconButton(
               tooltip: l10n.chronologySortByDate,

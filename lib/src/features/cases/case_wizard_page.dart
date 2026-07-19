@@ -8,6 +8,7 @@ import 'package:sewabukti/src/core/theme/app_colors.dart';
 import 'package:sewabukti/src/features/cases/case_controller.dart';
 import 'package:sewabukti/src/features/cases/case_model.dart';
 import 'package:sewabukti/src/features/cases/deposit_calculator.dart';
+import 'package:sewabukti/src/features/shared/widgets/language_selector.dart';
 import 'package:sewabukti/src/features/shared/widgets/legal_notice.dart';
 import 'package:sewabukti/src/l10n/app_localizations.dart';
 
@@ -31,7 +32,10 @@ class CaseWizardPage extends ConsumerWidget {
   }
 
   Widget _scaffold(AppLocalizations l10n, Widget body) => Scaffold(
-    appBar: AppBar(title: Text(l10n.caseWizardTitle)),
+    appBar: AppBar(
+      title: Text(l10n.caseWizardTitle),
+      actions: const <Widget>[LanguageSelector(compact: true)],
+    ),
     body: SafeArea(child: body),
   );
 }
@@ -288,6 +292,7 @@ class _CaseWizardViewState extends ConsumerState<_CaseWizardView> {
         ),
         title: Text(l10n.caseWizardTitle),
         actions: <Widget>[
+          const LanguageSelector(compact: true),
           IconButton(
             icon: const Icon(Icons.save_outlined),
             tooltip: l10n.wizardSaveExit,

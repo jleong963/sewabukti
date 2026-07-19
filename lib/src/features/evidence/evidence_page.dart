@@ -16,6 +16,7 @@ import 'package:sewabukti/src/features/evidence/evidence_category.dart';
 import 'package:sewabukti/src/features/evidence/evidence_controller.dart';
 import 'package:sewabukti/src/features/evidence/evidence_file.dart';
 import 'package:sewabukti/src/features/evidence/evidence_repository.dart';
+import 'package:sewabukti/src/features/shared/widgets/language_selector.dart';
 import 'package:sewabukti/src/l10n/app_localizations.dart';
 
 /// Evidence checklist and management (§10.4). Upload, preview, download, and
@@ -60,6 +61,7 @@ class _CaseEvidencePageState extends ConsumerState<CaseEvidencePage> {
         onPressed: () => context.go(Routes.dashboard),
       ),
       title: Text(l10n.evidenceTitle),
+      actions: const <Widget>[LanguageSelector(compact: true)],
     ),
     body: SafeArea(
       child: Stack(

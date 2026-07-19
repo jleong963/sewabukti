@@ -16,6 +16,7 @@ import 'package:sewabukti/src/features/evidence/evidence_category.dart';
 import 'package:sewabukti/src/features/evidence/evidence_controller.dart';
 import 'package:sewabukti/src/features/evidence/evidence_file.dart';
 import 'package:sewabukti/src/features/evidence/evidence_repository.dart';
+import 'package:sewabukti/src/features/shared/widgets/language_selector.dart';
 import 'package:sewabukti/src/features/shared/widgets/legal_notice.dart';
 import 'package:sewabukti/src/l10n/app_localizations.dart';
 
@@ -66,6 +67,7 @@ class _EvidenceBundlePageState extends ConsumerState<EvidenceBundlePage> {
           onPressed: () => context.go(Routes.dashboard),
         ),
         title: Text(l10n.bundleTitle),
+        actions: const <Widget>[LanguageSelector(compact: true)],
       ),
       body: SafeArea(
         child: c == null

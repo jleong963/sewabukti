@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sewabukti/src/core/legal/legal_content.dart';
 import 'package:sewabukti/src/core/preferences/app_language.dart';
 import 'package:sewabukti/src/core/routing/routes.dart';
+import 'package:sewabukti/src/features/shared/widgets/language_selector.dart';
 import 'package:sewabukti/src/l10n/app_localizations.dart';
 
 /// Renders an [InfoDocument] (privacy, terms, help, or claim route) with a
@@ -182,6 +183,7 @@ class _InfoScaffold extends StatelessWidget {
               context.canPop() ? context.pop() : context.go(Routes.landing),
         ),
         title: Text(document.title),
+        actions: const <Widget>[LanguageSelector(compact: true)],
       ),
       body: SafeArea(child: InfoView(document: document)),
     );

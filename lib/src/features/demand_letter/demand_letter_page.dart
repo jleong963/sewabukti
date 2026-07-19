@@ -15,6 +15,7 @@ import 'package:sewabukti/src/features/demand_letter/demand_letter.dart';
 import 'package:sewabukti/src/features/demand_letter/demand_letter_repository.dart';
 import 'package:sewabukti/src/features/evidence/evidence_controller.dart';
 import 'package:sewabukti/src/features/evidence/evidence_file.dart';
+import 'package:sewabukti/src/features/shared/widgets/language_selector.dart';
 import 'package:sewabukti/src/features/shared/widgets/legal_notice.dart';
 import 'package:sewabukti/src/l10n/app_localizations.dart';
 
@@ -70,6 +71,7 @@ class _DemandLetterPageState extends ConsumerState<DemandLetterPage> {
           onPressed: () => context.go(Routes.dashboard),
         ),
         title: Text(l10n.demandLetterTitle),
+        actions: const <Widget>[LanguageSelector(compact: true)],
       ),
       body: SafeArea(
         child: c == null

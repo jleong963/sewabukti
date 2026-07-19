@@ -11,6 +11,7 @@ import 'package:sewabukti/src/core/routing/routes.dart';
 import 'package:sewabukti/src/features/cases/case_controller.dart';
 import 'package:sewabukti/src/features/cases/case_model.dart';
 import 'package:sewabukti/src/features/legal/legal_info_page.dart';
+import 'package:sewabukti/src/features/shared/widgets/language_selector.dart';
 import 'package:sewabukti/src/features/shared/widgets/legal_notice.dart';
 import 'package:sewabukti/src/l10n/app_localizations.dart';
 
@@ -38,6 +39,7 @@ class ClaimRoutePage extends ConsumerWidget {
           onPressed: () => context.go(Routes.dashboard),
         ),
         title: Text(l10n.claimRouteTitle),
+        actions: const <Widget>[LanguageSelector(compact: true)],
       ),
       body: SafeArea(
         child: InfoView(

@@ -11,6 +11,7 @@ import 'package:sewabukti/src/features/cases/case_controller.dart';
 import 'package:sewabukti/src/features/cases/case_model.dart';
 import 'package:sewabukti/src/features/evidence/evidence_controller.dart';
 import 'package:sewabukti/src/features/evidence/evidence_file.dart';
+import 'package:sewabukti/src/features/shared/widgets/language_selector.dart';
 import 'package:sewabukti/src/features/shared/widgets/legal_notice.dart';
 import 'package:sewabukti/src/l10n/app_localizations.dart';
 
@@ -38,6 +39,7 @@ class DashboardPage extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.navDashboard),
         actions: <Widget>[
+          const LanguageSelector(compact: true),
           IconButton(
             tooltip: l10n.navSettings,
             icon: const Icon(Icons.settings_outlined),
