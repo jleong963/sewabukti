@@ -39,6 +39,7 @@ extension type _IdConfiguration._(JSObject _) implements JSObject {
     bool auto_select,
     bool cancel_on_tap_outside,
     String ux_mode,
+    bool use_fedcm_for_button,
   });
 }
 
@@ -121,6 +122,10 @@ Future<void> gisInitialize({
     if (callback != null && token.isNotEmpty) callback(token);
   }
 
+  // FedCM button UX: the browser renders a native account chooser instead of a
+  // popup window, which desktop Chrome (M125+) now blocks for the legacy
+  // `gsi/select` popup (part of Google's third-party-cookie phase-out). Browsers
+  // without FedCM-button support fall back to the `ux_mode: 'popup'` flow below.
   _idInitialize(
     _IdConfiguration(
       client_id: clientId,
@@ -128,6 +133,7 @@ Future<void> gisInitialize({
       auto_select: false,
       cancel_on_tap_outside: true,
       ux_mode: 'popup',
+      use_fedcm_for_button: true,
     ),
   );
   _initialized = true;
